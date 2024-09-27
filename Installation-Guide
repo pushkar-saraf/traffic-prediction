@@ -1,0 +1,60 @@
+# Kubeflow Installation on Mac
+
+# Step 1: Install Minikube using Homebrew
+brew install minikube
+
+# Step 2: Start Minikube with specified memory and CPU allocation
+minikube start --memory=8192 --cpus=4
+
+# Step 3: Clone the Kubeflow manifests repository
+git clone https://github.com/kubeflow/manifests.git
+cd manifests
+
+# Step 4: Deploy Kubeflow using kustomize
+# This step may take some time as it involves applying several configurations
+while ! kustomize build example | kubectl apply -f -; do echo "Retrying to apply resources"; sleep 10; done
+
+# Step 5: Start Minikube tunnel to access the Kubeflow dashboard
+minikube tunnel
+
+# Kubeflow should now be installed and accessible.
+# Open your browser and go to http://localhost/ to access the Kubeflow dashboard.
+
+
+
+# Kubeflow Installation on Windows
+
+# Step 1: Install Minikube
+# Download and install Minikube from: https://minikube.sigs.k8s.io/docs/start/
+# Make sure to select the appropriate version for your Windows system.
+
+# Step 2: Install kubectl (Kubernetes CLI)
+# Download and install kubectl from: https://kubernetes.io/docs/tasks/tools/install-kubectl/
+
+# Step 3: Start Minikube with the Hyper-V driver (Run the following command in Command Prompt or PowerShell as Administrator)
+minikube start --driver=hyperv --memory=8192 --cpus=4
+
+# Step 4: Download and Install Kustomize
+# Download Kustomize from: https://github.com/kubernetes-sigs/kustomize/releases
+# Extract the file and add the kustomize executable to your system PATH.
+
+# Step 5: Clone the Kubeflow manifests repository
+git clone https://github.com/kubeflow/manifests.git
+cd manifests
+
+# Step 6: Deploy Kubeflow using kustomize
+# This step may take some time as it involves applying several configurations
+while ! kustomize build example | kubectl apply -f -; do echo "Retrying to apply resources"; sleep 10; done
+
+# Step 7: Start Minikube tunnel to access the Kubeflow dashboard
+minikube tunnel
+
+# Kubeflow should now be installed and accessible.
+# Open your browser and go to http://localhost/ to access the Kubeflow dashboard.
+
+
+Instructions for Using These Text Files:
+Copy the contents of the respective text files into your terminal (Mac) or Command Prompt/PowerShell (Windows).
+Make sure to follow the installation steps in sequence.
+For Windows, make sure to run the commands as an Administrator to avoid permission issues.
+After completing these steps, Kubeflow should be accessible via your web browser at http://localhost/.
