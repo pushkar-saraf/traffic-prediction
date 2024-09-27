@@ -1,0 +1,84 @@
+## Phase 2: Deploying the Model Using Kubernetes
+
+### Step 1: Build and Push the Docker Image
+1. **Create a Dockerfile**:
+   ```dockerfile
+   # Sample Dockerfile
+   FROM python:3.8-slim
+   WORKDIR /app
+   COPY requirements.txt /app/
+   RUN pip install --no-cache-dir -r requirements.txt
+   COPY . /app
+   EXPOSE 5000
+   CMD ["python", "app.py"]
+   ```
+
+2. **Build the Docker image**:
+   ```bash
+   docker build -t <your-dockerhub-username>/metr-la-model .
+   ```
+
+3. **Push the Docker image** to Docker Hub:
+   ```bash
+   docker push <your-dockerhub-username>/metr-la-model
+   ```
+
+### Step 2: Deploying with Kubernetes
+1. **Create a Deployment YAML (starter_deployment.yaml)**:
+   ```yaml
+   apiVersion: apps/v1
+   kind: Deployment
+   metadata:
+     name: traffic-prediction-deployment
+   spec:
+     replicas: 2
+     selector:
+       matchLabels:
+         app: traffic-prediction-app
+     template:
+       metadata:
+         labels:
+           app: traffic-prediction-app
+       spec:
+         containers:
+         - name: traffic-prediction-container
+           image: <your-dockerhub-username>/metr-la-model:latest
+           ports:
+           - containerPort: 5000
+   ```
+
+2. **Create a Service YAML (starter_service.yaml)**:
+   ```yaml
+   apiVersion: v1
+   kind: Service
+   metadata:
+     name: traffic-prediction-service
+   spec:
+     type: LoadBalancer
+     selector:
+       app: traffic-prediction-app
+     ports:
+       - protocol: TCP
+         port: 80
+         targetPort: 5000
+   ```
+
+3. **Deploy the Application**:
+   - Apply the Deployment and Service files:
+     ```bash
+     kubectl apply -f starter_deployment.yaml
+     kubectl apply -f starter_service.yaml
+     ```
+   - Verify the deployment:
+     ```bash
+     kubectl get deployments
+     kubectl get services
+     ```
+
+4. **Access the Application**:
+   - If using Minikube:
+     ```bash
+     minikube service traffic-prediction-service
+     ```
+   - For cloud deployment, use the external IP assigned by the LoadBalancer.
+
