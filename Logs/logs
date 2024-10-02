@@ -1,0 +1,52 @@
+/home/owl/PycharmProjects/traffic-prediction/.venv/bin/python /home/owl/PycharmProjects/traffic-prediction/starter_notebook_phase_1.py
+2024-10-02 00:14:15.360552: I external/local_xla/xla/tsl/cuda/cudart_stub.cc:32] Could not find cuda drivers on your machine, GPU will not be used.
+2024-10-02 00:14:15.365694: I external/local_xla/xla/tsl/cuda/cudart_stub.cc:32] Could not find cuda drivers on your machine, GPU will not be used.
+2024-10-02 00:14:15.380950: E external/local_xla/xla/stream_executor/cuda/cuda_fft.cc:485] Unable to register cuFFT factory: Attempting to register factory for plugin cuFFT when one has already been registered
+2024-10-02 00:14:15.402909: E external/local_xla/xla/stream_executor/cuda/cuda_dnn.cc:8454] Unable to register cuDNN factory: Attempting to register factory for plugin cuDNN when one has already been registered
+2024-10-02 00:14:15.408943: E external/local_xla/xla/stream_executor/cuda/cuda_blas.cc:1452] Unable to register cuBLAS factory: Attempting to register factory for plugin cuBLAS when one has already been registered
+2024-10-02 00:14:15.425920: I tensorflow/core/platform/cpu_feature_guard.cc:210] This TensorFlow binary is optimized to use available CPU instructions in performance-critical operations.
+To enable the following instructions: AVX2 FMA, in other operations, rebuild TensorFlow with the appropriate compiler flags.
+2024-10-02 00:14:16.626936: W tensorflow/compiler/tf2tensorrt/utils/py_utils.cc:38] TF-TRT Warning: Could not find TensorRT
+/home/owl/PycharmProjects/traffic-prediction/.venv/lib/python3.12/site-packages/kfp/dsl/component_decorator.py:121: FutureWarning: The default base_image used by the @dsl.component decorator will switch from 'python:3.8' to 'python:3.9' on Oct 1, 2024. To ensure your existing components work with versions of the KFP SDK released after that date, you should provide an explicit base_image argument and ensure your component works as intended on Python 3.9.
+  return component_factory.create_component_from_func(
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1727842458.422476 2884988 cuda_executor.cc:1015] successful NUMA node read from SysFS had negative value (-1), but there must be at least one NUMA node, so returning NUMA node zero. See more at https://github.com/torvalds/linux/blob/v6.0/Documentation/ABI/testing/sysfs-bus-pci#L344-L355
+2024-10-02 00:14:18.423515: W tensorflow/core/common_runtime/gpu/gpu_device.cc:2343] Cannot dlopen some GPU libraries. Please make sure the missing libraries mentioned above are installed properly if you would like to use GPU. Follow the guide at https://www.tensorflow.org/install/gpu for how to download and setup the required libraries for your platform.
+Skipping registering GPU devices...
+/home/owl/PycharmProjects/traffic-prediction/.venv/lib/python3.12/site-packages/keras/src/layers/rnn/rnn.py:204: UserWarning: Do not pass an `input_shape`/`input_dim` argument to a layer. When using Sequential models, prefer using an `Input(shape)` object as the first layer in the model instead.
+  super().__init__(**kwargs)
+2024-10-02 00:14:19.104960: W external/local_tsl/tsl/framework/cpu_allocator_impl.cc:83] Allocation of 198579240 exceeds 10% of free system memory.
+750/750 ━━━━━━━━━━━━━━━━━━━━ 7s 6ms/step - loss: 0.1020 - mae: 0.1945
+2024-10-02 00:14:26.337767: W external/local_tsl/tsl/framework/cpu_allocator_impl.cc:83] Allocation of 198579240 exceeds 10% of free system memory.
+750/750 ━━━━━━━━━━━━━━━━━━━━ 3s 3ms/step
+2024-10-02 00:14:29.471074: W external/local_tsl/tsl/framework/cpu_allocator_impl.cc:83] Allocation of 85110120 exceeds 10% of free system memory.
+322/322 ━━━━━━━━━━━━━━━━━━━━ 1s 3ms/step
+Train Score: 0.16 RMSE
+Test Score: 0.17 RMSE
+[<KerasVariable shape=(207, 256), dtype=float32, path=sequential/lstm/lstm_cell/kernel>, <KerasVariable shape=(64, 256), dtype=float32, path=sequential/lstm/lstm_cell/recurrent_kernel>, <KerasVariable shape=(256,), dtype=float32, path=sequential/lstm/lstm_cell/bias>, <KerasVariable shape=(64, 128), dtype=float32, path=sequential/lstm_1/lstm_cell/kernel>, <KerasVariable shape=(32, 128), dtype=float32, path=sequential/lstm_1/lstm_cell/recurrent_kernel>, <KerasVariable shape=(128,), dtype=float32, path=sequential/lstm_1/lstm_cell/bias>, <KerasVariable shape=(32, 207), dtype=float32, path=sequential/dense/kernel>, <KerasVariable shape=(207,), dtype=float32, path=sequential/dense/bias>]
+Model: "sequential"
+┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━┓
+┃ Layer (type)                    ┃ Output Shape           ┃       Param # ┃
+┡━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━┩
+│ lstm (LSTM)                     │ (None, 10, 64)         │        69,632 │
+├─────────────────────────────────┼────────────────────────┼───────────────┤
+│ lstm_1 (LSTM)                   │ (None, 32)             │        12,416 │
+├─────────────────────────────────┼────────────────────────┼───────────────┤
+│ dense (Dense)                   │ (None, 207)            │         6,831 │
+└─────────────────────────────────┴────────────────────────┴───────────────┘
+ Total params: 266,639 (1.02 MB)
+ Trainable params: 88,879 (347.18 KB)
+ Non-trainable params: 0 (0.00 B)
+ Optimizer params: 177,760 (694.38 KB)
+WARNING:absl:You are saving your model as an HDF5 file via `model.save()` or `keras.saving.save_model(model)`. This file format is considered legacy. We recommend using instead the native Keras format, e.g. `model.save('my_model.keras')` or `keras.saving.save_model(model, 'my_model.keras')`.
+/home/owl/PycharmProjects/traffic-prediction/.venv/lib/python3.12/site-packages/visualkeras/layered.py:86: UserWarning: The legend_text_spacing_offset parameter is deprecated and will be removed in a future release.
+  warnings.warn("The legend_text_spacing_offset parameter is deprecated and will be removed in a future release.")
+/home/owl/PycharmProjects/traffic-prediction/.venv/lib/python3.12/site-packages/kfp/client/client.py:159: FutureWarning: This client only works with Kubeflow Pipeline v2.0.0-beta.2 and later versions.
+  warnings.warn(
+Experiment details: http://localhost:8080/pipeline/#/experiments/details/df519b2e-b88a-4d20-9c00-3713c5a7e669
+Run details: http://localhost:8080/pipeline/#/runs/details/7d5d7a29-a785-4f72-b91c-6175a35112c0
+Run details: http://localhost:8080/pipeline/#/runs/details/713c2bf1-542c-49d7-bcc0-2bda72d07a2c
+None
+None
+
+Process finished with exit code 0

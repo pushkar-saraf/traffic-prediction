@@ -1,0 +1,34 @@
+time="2024-10-02T03:15:46.108Z" level=info msg="capturing logs" argo=true
+I1002 03:15:46.136985      21 cache.go:116] Connecting to cache endpoint 10.103.91.227:8887
+WARNING: Running pip as the 'root' user can result in broken permissions and conflicting behaviour with the system package manager. It is recommended to use a virtual environment instead: https://pip.pypa.io/warnings/venv
+[KFP Executor 2024-10-02 03:15:50,179 INFO]: Looking for component `print_result` in --component_module_path `/tmp/tmp.hz7Xw1e710/ephemeral_component.py`
+[KFP Executor 2024-10-02 03:15:50,179 INFO]: Loading KFP component "print_result" from /tmp/tmp.hz7Xw1e710/ephemeral_component.py (directory "/tmp/tmp.hz7Xw1e710" and module name "ephemeral_component")
+[KFP Executor 2024-10-02 03:15:50,180 INFO]: Got executor_input:
+{
+    "inputs": {
+        "parameterValues": {
+            "model": "GRU",
+            "result": "0.15634858247858438,0.1674941401007265"
+        }
+    },
+    "outputs": {
+        "parameters": {
+            "Output": {
+                "outputFile": "/tmp/kfp/outputs/Output"
+            }
+        },
+        "outputFile": "/tmp/kfp_outputs/output_metadata.json"
+    }
+}
+GRU
+0.15634858247858438,0.1674941401007265!
+[KFP Executor 2024-10-02 03:15:50,180 INFO]: Wrote executor output file to /tmp/kfp_outputs/output_metadata.json.
+/usr/local/lib/python3.8/runpy.py:111: FutureWarning: KFP will drop support for Python 3.8 on Oct 1, 2024. To use new versions of the KFP SDK after that date, you will need to upgrade to Python >= 3.9. See https://devguide.python.org/versions/ for more details.
+  __import__(pkg_name)
+I1002 03:15:50.189918      21 launcher_v2.go:704] ExecutorOutput: {
+  "parameterValues": {
+    "Output": "0.15634858247858438,0.1674941401007265!"
+  }
+}
+I1002 03:15:50.229363      21 launcher_v2.go:150] publish success.
+time="2024-10-02T03:15:51.112Z" level=info msg="sub-process exited" argo=true error="<nil>"

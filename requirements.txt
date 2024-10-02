@@ -1,5 +1,5 @@
 Flask==2.0.1
-numpy==1.21.2
+numpy==1.21.1
 tensorflow==2.6.0   # If using TensorFlow
 scikit-learn==0.24.2
 joblib==1.0.1       # For loading/saving scikit-learn models

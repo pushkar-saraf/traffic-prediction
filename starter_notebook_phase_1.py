@@ -2,24 +2,35 @@
 # This starter notebook will guide you through building LSTM and GRU models 
 # and tracking the experiments using Kubeflow.
 
+import h5py
+# Kubeflow SDK for creating a pipeline
+import kfp
 # Import essential libraries
 import numpy as np
 import pandas as pd
+import visualkeras
+from PIL import ImageFont
+from keras import Sequential
+from keras.src.layers import GRU, Dense, LSTM
+from keras.src.utils import plot_model
+from kfp import dsl, compiler
+from kfp.dsl import Model, Input, Dataset, Artifact
+from kfp.dsl.component_factory import create_component_from_func
+from sklearn.metrics import mean_squared_error
 from sklearn.preprocessing import MinMaxScaler
-from tensorflow.keras.models import Sequential
-from tensorflow.keras.layers import LSTM, Dense, GRU
-from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
 
-# Kubeflow SDK for creating a pipeline
-import kfp
-from kfp import dsl
 
 # Step 1: Load and preprocess the METR-LA dataset
 # Replace this with actual dataset loading logic
 def load_data():
-    # Example: Create a dummy dataset
-    data = pd.DataFrame(np.sin(np.linspace(0, 100, 1000)), columns=['traffic_speed'])
-    return data
+    filename = 'METR-LA.h5'
+    with h5py.File(filename, 'r') as f:
+        timestamps = pd.to_datetime(f['df']['axis1'][:], unit='ns')
+        sensor_ids = [s.decode('utf-8') for s in f['df']['axis0'][:]]
+        data_values = f['df']['block0_values'][:]
+    df = pd.DataFrame(data_values, index=timestamps, columns=sensor_ids)
+    return df
+
 
 # Step 2: Data preprocessing
 def preprocess_data(data):
@@ -27,6 +38,7 @@ def preprocess_data(data):
     scaler = MinMaxScaler()
     data_scaled = scaler.fit_transform(data)
     return data_scaled, scaler
+
 
 # Step 3: Create sequences for time-series forecasting
 def create_sequences(data, time_steps=10):
@@ -37,43 +49,91 @@ def create_sequences(data, time_steps=10):
         y.append(data[i + time_steps])
     return np.array(X), np.array(y)
 
+
 # Step 4: Define LSTM and GRU models
 def build_lstm_model(input_shape):
     # Basic LSTM architecture
     model = Sequential()
     model.add(LSTM(64, input_shape=input_shape, return_sequences=True))
     model.add(LSTM(32))
-    model.add(Dense(1))
+    model.add(Dense(207))
     model.compile(optimizer='adam', loss='mse', metrics=['mae'])
     return model
+
 
 def build_gru_model(input_shape):
     # Basic GRU architecture
     model = Sequential()
     model.add(GRU(64, input_shape=input_shape, return_sequences=True))
     model.add(GRU(32))
-    model.add(Dense(1))
+    model.add(Dense(207))
     model.compile(optimizer='adam', loss='mse', metrics=['mae'])
     return model
 
+
 # Step 5: Define the Kubeflow pipeline function
-@dsl.pipeline(
-    name='Traffic Prediction Pipeline',
-    description='Train and evaluate LSTM and GRU models'
-)
-def traffic_prediction_pipeline(model_type: str):
-    # The training function logic will be included here (refer to Phase 1 completion steps)
-    pass  # TODO: Replace with the pipeline components
+def train_and_test(name: str, model: Sequential, sequences: Dataset):
+    x = sequences[0]
+    y = sequences[1]
+    dataset_len = len(sequences[1])
+    train_size = int(dataset_len * 0.7)
+    x_train, x_test = x[0:train_size], x[train_size:dataset_len]
+    y_train, y_test = y[0:train_size], y[train_size:dataset_len]
+    model.fit(x_train, y_train, verbose=1)
+    # make predictions
+    train_predict = model.predict(x_train)
+    test_predict = model.predict(x_test)
+    # calculate root mean squared error
+    train_score = np.sqrt(mean_squared_error(y_train, train_predict))
+    print('Train Score: %.2f RMSE' % (train_score))
+    test_score = np.sqrt(mean_squared_error(y_test, test_predict))
+    print('Test Score: %.2f RMSE' % (test_score))
+    print(model.weights)
+    weights = ''
+    font = ImageFont.load_default()
+    # Check its architecture
+    model.summary()
+
+    # Save the model into h5 format
+    # model.save(f'{name}.h5')
+    # visualkeras.layered_view(model, legend=True, font=font, to_file=f'{name}.png')
+    for layer in model.layers: weights += f'Config = {layer.get_config()}, weights={layer.get_weights()}'
+    result = {'train_score': train_score, 'test_score': test_score, 'parameters': weights}
+    return result
+
+
+@dsl.component
+def print_result(model: str, result: str) -> str:
+    result = f'{result}!'
+    return result
+
+
+@dsl.pipeline(name='ML Model', description='Train and test model')
+def evaluate_model(model_type: str) -> str:
+    data = load_data()
+    data = preprocess_data(data)[0]
+    sequences = create_sequences(data)
+    input_shape = (10, 207)
+    # if model_type == 'LSTM':
+    #     model = build_lstm_model(input_shape)
+    # elif model_type == 'GRU':
+    model = build_gru_model(input_shape)
+    # else:
+    #     raise 'Invalid model name'
+    result = train_and_test(name=model_type, model=model, sequences=sequences)
+    result = print_result(model=model_type, result=str(result))
+    return result.output
+
 
 # Compile and run the Kubeflow pipeline
 if __name__ == "__main__":
-    # Compile pipeline definition
-    kfp.compiler.Compiler().compile(traffic_prediction_pipeline, 'traffic_prediction_pipeline.yaml')
-    
-    # Upload and run pipeline (Make sure Kubeflow Pipelines is running)
-    client = kfp.Client()
-    experiment = client.create_experiment('Traffic_Prediction_Experiment')
-    
-    # Start a run for either LSTM or GRU
-    run = client.run_pipeline(experiment.id, 'traffic_prediction_run', 'traffic_prediction_pipeline.yaml',
-                              {"model_type": "LSTM"})  # Change to "GRU" for GRU model training
+    # compiler.Compiler().compile(evaluate_model, 'pipeline_lstm.yaml')
+    # client = kfp.Client(host=f"http://localhost:8080/pipeline")
+    # experiment = client.create_experiment('phase 1')
+    # run1 = client.run_pipeline(experiment.experiment_id, 'traffic_prediction_run', 'pipeline_lstm.yaml',
+    #                            {'model_type': 'LSTM'})
+    compiler.Compiler().compile(evaluate_model, 'pipeline_gru.yaml')
+    client = kfp.Client(host=f"http://localhost:8080/pipeline")
+    experiment = client.create_experiment('phase 1')
+    run2 = client.run_pipeline(experiment.experiment_id, 'traffic_prediction_run', 'pipeline_gru.yaml',
+                               {'model_type': 'GRU'})
