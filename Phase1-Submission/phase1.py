@@ -15,7 +15,7 @@ from kfp.dsl import Dataset
 from sklearn.metrics import mean_squared_error, r2_score, mean_absolute_error
 from sklearn.preprocessing import MinMaxScaler
 import matplotlib.pyplot as plt
-
+from statsmodels.graphics.tsaplots import plot_acf, plot_pacf
 
 # Step 1: Load and preprocess the METR-LA dataset
 # Replace this with actual dataset loading logic
@@ -42,6 +42,10 @@ def create_sequences(data, time_steps=10):
     # Create sequences for LSTM or GRU input
     X, y = [], []
     for i in range(len(data) - time_steps):
+        if i==0:
+            plot_acf(data[0], lags=50)
+            plt.show()
+            exit()
         X.append(data[i:i + time_steps])
         y.append(data[i + time_steps])
     return np.array(X), np.array(y)
