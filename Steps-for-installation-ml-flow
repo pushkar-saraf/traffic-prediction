@@ -1,0 +1,25 @@
+"""
+Traffic Prediction Experiment with MLflow
+
+This script trains traffic prediction models using LSTM and GRU architectures and logs the experiments using MLflow for easy tracking of parameters, metrics, and artifacts (including trained models and logs).
+
+Instructions:
+1. Install the required libraries:
+   pip install mlflow tensorflow numpy pandas scikit-learn
+
+2. Run the experiment:
+   python starter-notebook-phase-1-mlflow.py
+
+3. Start the MLflow UI:
+   mlflow ui
+   Open your browser and go to http://127.0.0.1:5000
+
+4. View experiment logs and metrics:
+   - Click on the experiment in the MLflow UI
+   - View the logged parameters, metrics, and artifacts (like train.log)
+
+5. Download logs:
+   - In the MLflow UI, go to the Artifacts section of the run
+   - Download the train.log file or other saved models
+
+"""
