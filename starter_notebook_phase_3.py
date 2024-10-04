@@ -1,71 +1,83 @@
-import numpy as np
-import pandas as pd
-from evidently.report import Report
-from evidently.metric_preset import DataDriftPreset, ClassificationPreset
-from evidently import ColumnMapping
-from flask import Flask, send_file
-import smtplib
+import numpy as np  # For generating random data and performing numerical operations
+import pandas as pd  # For handling data in DataFrame format
+from evidently.report import Report  # Importing the Evidently report class
+from evidently.metric_preset import DataDriftPreset, ClassificationPreset  # Metric presets for drift and classification
+from evidently import ColumnMapping  # Mapping the columns for use in Evidently
+from flask import Flask, send_file  # Flask for serving a simple web application
+import smtplib  # For sending email notifications
 
 # Step 1: Generate Dummy Data
 
-# Generate dummy reference data (training data)
-np.random.seed(0)
+# Generate dummy reference data (simulating the training data)
+# Using numpy's random functions to generate normal distributions for two features.
+np.random.seed(0)  # Set seed for reproducibility of random data
 reference_data = pd.DataFrame({
-    'feature_1': np.random.normal(0, 1, 1000),
-    'feature_2': np.random.normal(0, 1, 1000),
-    'target': np.random.choice([0, 1], 1000)
+    'feature_1': np.random.normal(0, 1, 1000),  # Feature 1: normal distribution, mean=0, std=1
+    'feature_2': np.random.normal(0, 1, 1000),  # Feature 2: normal distribution, mean=0, std=1
+    'target': np.random.choice([0, 1], 1000)  # Random binary target variable (classification)
 })
 
-# Add a dummy prediction column to the reference data (NaN values)
-reference_data['prediction'] = 0  # Dummy prediction column in reference data
+# Add a dummy prediction column to the reference data (NaN values initially or a placeholder)
+# In a real scenario, this column would contain model predictions on the reference data.
+reference_data['prediction'] = 0  # Dummy predictions column initialized to 0
 
-# Generate dummy current data (production data, simulating drift)
+# Generate dummy current data (simulating the production data and introducing drift)
+# We simulate data drift by changing the mean of 'feature_1' to 0.5 while keeping 'feature_2' the same.
 current_data = pd.DataFrame({
-    'feature_1': np.random.normal(0.5, 1, 1000),  # Simulated drift in feature_1
-    'feature_2': np.random.normal(0, 1, 1000),
-    'target': np.random.choice([0, 1], 1000)
+    'feature_1': np.random.normal(0.5, 1, 1000),  # Simulated drift in 'feature_1' (mean changed to 0.5)
+    'feature_2': np.random.normal(0, 1, 1000),  # 'feature_2' remains with the same distribution as reference
+    'target': np.random.choice([0, 1], 1000)  # Random binary target variable
 })
 
-# Simulate a simple prediction model (replace this with your actual model)
-current_data['prediction'] = np.random.choice([0, 1], 1000)  # Simulated predictions for current data
+# Simulate predictions for the current data (in reality, this would come from your deployed model)
+# We randomly assign 0 or 1 as predictions, mimicking a basic classification model's outputs.
+current_data['prediction'] = np.random.choice([0, 1], 1000)
 
 # Step 2: Define the Column Mapping
 
-# Create a column mapping to tell Evidently which columns represent predictions, targets, and features
+# Column mapping tells Evidently which columns represent features, predictions, and the target variable.
+# This helps Evidently calculate metrics and understand the data's structure.
 column_mapping = ColumnMapping(
-    prediction="prediction",
-    target="target",
-    numerical_features=["feature_1", "feature_2"]
+    prediction="prediction",  # Column for model predictions
+    target="target",  # Column for ground truth labels (target variable)
+    numerical_features=["feature_1", "feature_2"]  # List of numerical features in the dataset
 )
 
 # Step 3: Set Up Evidently Report for Monitoring Data Drift and Classification Performance
 
-# Initialize the report with data drift and classification performance metrics
+# Initialize an Evidently report, specifying the metrics we want to calculate.
+# Here, we use two preset metrics:
+# - DataDriftPreset: for detecting drift in the input features
+# - ClassificationPreset: for evaluating classification performance (e.g., accuracy, precision)
 report = Report(metrics=[
-    DataDriftPreset(),
-    ClassificationPreset()
+    DataDriftPreset(),  # Monitor data drift in features
+    ClassificationPreset()  # Monitor classification performance (like accuracy, F1 score)
 ])
 
-# Calculate the report based on reference and current data, with column mapping
+# Run the report on the reference (training) and current (production) data
+# The column mapping specifies how to interpret the data (features, target, predictions)
 report.run(reference_data=reference_data, current_data=current_data, column_mapping=column_mapping)
 
-# Save the report as an HTML file
+# Save the generated report as an HTML file, which can be viewed in a browser
 report.save_html("evidently_model_report.html")
 
 # Step 4: Set Up Flask App to Serve the Monitoring Dashboard
 
+# Initialize a Flask web application for serving the monitoring dashboard
 app = Flask(__name__)
 
 @app.route('/monitoring')
 def show_dashboard():
-    # Serve the Evidently report as a static HTML file
+    # This route serves the HTML report generated by Evidently
     return send_file('evidently_model_report.html')
 
 # Step 5: Function to Send Email Alerts for Data Drift
 
+# Function to send an email alert when data drift is detected.
+# This function sends an alert email with the drift score if drift exceeds a defined threshold.
 def send_email_alert(drift_score):
-    sender = 'alert@yourdomain.com'
-    receivers = ['team@yourdomain.com']
+    sender = 'alert@yourdomain.com'  # Sender's email address
+    receivers = ['team@yourdomain.com']  # List of recipients
     message = f"""Subject: Data Drift Alert
 
     Data drift detected! The drift score is {drift_score}.
@@ -73,30 +85,39 @@ def send_email_alert(drift_score):
     """
 
     try:
-        smtp_obj = smtplib.SMTP('localhost')  # Ensure a mail server is running locally or replace with a real SMTP server
-        smtp_obj.sendmail(sender, receivers, message)
+        # Try to connect to an SMTP server to send the email (SMTP server must be running)
+        smtp_obj = smtplib.SMTP('localhost')  # Replace 'localhost' with a real SMTP server if needed
+        smtp_obj.sendmail(sender, receivers, message)  # Send the email
         print("Successfully sent email alert")
     except Exception as e:
+        # Handle any errors that occur while trying to send the email
         print(f"Error: unable to send email - {e}")
 
 # Step 6: Check Data Drift and Trigger Email Alerts
 
-# Get the drift results as a dictionary from Evidently report
+# Get the drift results from the Evidently report, which provides a dictionary of metrics
 drift_results = report.as_dict()
-dataset_drift = drift_results['metrics'][0]['result']['dataset_drift']  # Get the dataset drift value
 
-# Define a threshold for drift (e.g., 0.5 or 50%)
+# Extract the 'dataset_drift' value, which indicates the level of drift in the entire dataset
+# A score of 1.0 means full drift (high difference), while 0.0 means no drift (same as reference data).
+dataset_drift = drift_results['metrics'][0]['result']['dataset_drift']  # Access the drift score from the results
+
+# Define a threshold for triggering the alert (e.g., if drift exceeds 0.5 or 50%)
 drift_threshold = 0.5
 
-# Check if drift exceeds the threshold and trigger an email alert
+# Check if the detected drift exceeds the defined threshold
 if dataset_drift > drift_threshold:
+    # If drift is significant, print a warning message and trigger the email alert
     print(f"Data drift detected! Drift score: {dataset_drift}")
     send_email_alert(dataset_drift)
 else:
+    # If no significant drift is detected, print a message to indicate the system is stable
     print(f"No significant data drift detected. Drift score: {dataset_drift}")
 
 # Step 7: Run the Flask App
 
+# The script starts the Flask web server when executed. The server listens on all IP addresses (0.0.0.0)
+# and serves the dashboard on port 5001.
 if __name__ == "__main__":
     print("Starting the Flask server for monitoring dashboard...")
     app.run(host="0.0.0.0", port=5001)
