@@ -1,0 +1,15 @@
+artifact_uri: file:///Users/harshit/Documents/Fall-2024/FOAI-TA/Team-Assignment/94879-starter-code-Team-Project/mlruns/0/acbe77c28bdb433ab0a81211d4d83b58/artifacts
+end_time: 1728002172922
+entry_point_name: ''
+experiment_id: '0'
+lifecycle_stage: active
+run_id: acbe77c28bdb433ab0a81211d4d83b58
+run_name: receptive-carp-549
+run_uuid: acbe77c28bdb433ab0a81211d4d83b58
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1728002163028
+status: 3
+tags: []
+user_id: harshit
