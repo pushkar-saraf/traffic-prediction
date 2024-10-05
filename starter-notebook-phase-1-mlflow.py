@@ -1,21 +1,30 @@
-import numpy as np
-import pandas as pd
-from sklearn.preprocessing import MinMaxScaler
-from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
+import logging
+
+import h5py
 import mlflow
 import mlflow.keras
-from tensorflow.keras.models import Sequential
-from tensorflow.keras.layers import LSTM, GRU, Dense
-import logging
+import numpy as np
+import pandas as pd
+from keras import Sequential
+from keras.src.layers import LSTM, Dense, GRU
+from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
+from sklearn.preprocessing import MinMaxScaler
 
 # Step 1: Set up logging to a file (train.log)
 logging.basicConfig(filename='train.log', level=logging.INFO, format='%(asctime)s - %(message)s')
+mlflow.set_tracking_uri('mlruns')
+
 
 # Step 2: Load and preprocess the dataset (dummy data used here)
 def load_data():
-    # Example: Create a dummy dataset (replace this with actual data loading logic)
-    data = pd.DataFrame(np.sin(np.linspace(0, 100, 1000)), columns=['traffic_speed'])
-    return data
+    filename = 'METR-LA.h5'
+    with h5py.File(filename, 'r') as f:
+        timestamps = pd.to_datetime(f['df']['axis1'][:], unit='ns')
+        sensor_ids = [s.decode('utf-8') for s in f['df']['axis0'][:]]
+        data_values = f['df']['block0_values'][:]
+    df = pd.DataFrame(data_values, index=timestamps, columns=sensor_ids)
+    return df
+
 
 def preprocess_data(data):
     # Use MinMaxScaler to normalize the data
@@ -23,30 +32,35 @@ def preprocess_data(data):
     data_scaled = scaler.fit_transform(data)
     return data_scaled, scaler
 
+
 # Step 3: Create sequences for time-series forecasting
 def create_sequences(data, time_steps=10):
+
     X, y = [], []
     for i in range(len(data) - time_steps):
         X.append(data[i:i + time_steps])
         y.append(data[i + time_steps])
     return np.array(X), np.array(y)
 
+
 # Step 4: Define the LSTM and GRU models
 def build_lstm_model(input_shape):
     model = Sequential()
     model.add(LSTM(64, input_shape=input_shape, return_sequences=True))
     model.add(LSTM(32))
-    model.add(Dense(1))
+    model.add(Dense(207))
     model.compile(optimizer='adam', loss='mse', metrics=['mae'])
     return model
+
 
 def build_gru_model(input_shape):
     model = Sequential()
     model.add(GRU(64, input_shape=input_shape, return_sequences=True))
     model.add(GRU(32))
-    model.add(Dense(1))
+    model.add(Dense(207))
     model.compile(optimizer='adam', loss='mse', metrics=['mae'])
     return model
+
 
 # Step 5: Train and evaluate the model, and log to MLflow
 def train_and_evaluate(model_type="LSTM"):
@@ -57,11 +71,11 @@ def train_and_evaluate(model_type="LSTM"):
     # Create sequences
     time_steps = 10
     X, y = create_sequences(data_scaled, time_steps)
-    
-    # Reshape the data to (samples, time_steps, features)
-    X = X.reshape((X.shape[0], X.shape[1], 1))  # One feature (traffic_speed)
-    
-    input_shape = (X.shape[1], X.shape[2])
+
+    # # Reshape the data to (samples, time_steps, features)
+    # X = X.reshape((X.shape[0], X.shape[1], 1))  # One feature (traffic_speed)
+    #
+    input_shape = (10, 207)
 
     # Start an MLflow run
     with mlflow.start_run():
@@ -101,9 +115,11 @@ def train_and_evaluate(model_type="LSTM"):
 
         logging.info(f"{model_type} Model - MAE: {mae}, MSE: {mse}, R2 Score: {r2}")
 
+
 if __name__ == "__main__":
     # Example of running the training for LSTM
     train_and_evaluate(model_type="LSTM")
+    train_and_evaluate(model_type='GRU')
 
     # You can also train the GRU model by passing model_type="GRU"
     # train_and_evaluate(model_type="GRU")
