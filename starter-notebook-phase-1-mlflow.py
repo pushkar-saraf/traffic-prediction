@@ -7,6 +7,7 @@ import numpy as np
 import pandas as pd
 from keras import Sequential
 from keras.src.layers import LSTM, Dense, GRU
+from numpy import shape
 from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
 from sklearn.preprocessing import MinMaxScaler
 
@@ -35,7 +36,6 @@ def preprocess_data(data):
 
 # Step 3: Create sequences for time-series forecasting
 def create_sequences(data, time_steps=10):
-
     X, y = [], []
     for i in range(len(data) - time_steps):
         X.append(data[i:i + time_steps])
@@ -75,7 +75,7 @@ def train_and_evaluate(model_type="LSTM"):
     # # Reshape the data to (samples, time_steps, features)
     # X = X.reshape((X.shape[0], X.shape[1], 1))  # One feature (traffic_speed)
     #
-    input_shape = (10, 207)
+    input_shape = (2070, 0)
 
     # Start an MLflow run
     with mlflow.start_run():
@@ -92,28 +92,40 @@ def train_and_evaluate(model_type="LSTM"):
         logging.info(f"Starting training for {model_type} model...")
 
         # Train the model
-        history = model.fit(X, y, epochs=5, batch_size=32, validation_split=0.2)
+        shape_X = shape(X)
+        # print(shape_X)
+        mse = {}
+        x_flat = [None] * shape_X[0]
+        for k in range(shape_X[0]):
+            x_flat[k] = X[k].reshape(-1)
+        print(shape(x_flat))
+        evaluate(model, x_flat, y, model_type)
 
-        # Make predictions and calculate metrics
-        y_pred = model.predict(X)
-        mae = mean_absolute_error(y, y_pred)
-        mse = mean_squared_error(y, y_pred)
-        r2 = r2_score(y, y_pred)
 
-        # Log metrics
-        mlflow.log_metric("mae", mae)
-        mlflow.log_metric("mse", mse)
-        mlflow.log_metric("r2_score", r2)
+def evaluate(model, X, y, model_type):
+    # history = model.fit(X, y, epochs=5, batch_size=32, validation_split=0.2)
+    history = model.fit(np.array(X), np.array(y))
 
-        logging.info(f"Model training complete. MAE: {mae}, MSE: {mse}, R2: {r2}")
+    # Make predictions and calculate metrics
+    y_pred = model.predict(X)
+    mae = mean_absolute_error(y, y_pred)
+    mse = mean_squared_error(y, y_pred)
+    r2 = r2_score(y, y_pred)
 
-        # Log the trained model to MLflow
-        mlflow.keras.log_model(model, "traffic_prediction_model")
+    # Log metrics
+    mlflow.log_metric("mae", mae)
+    mlflow.log_metric("mse", mse)
+    mlflow.log_metric("r2_score", r2)
 
-        # Upload the train.log file as an artifact
-        mlflow.log_artifact("train.log")
+    logging.info(f"Model training complete. MAE: {mae}, MSE: {mse}, R2: {r2}")
 
-        logging.info(f"{model_type} Model - MAE: {mae}, MSE: {mse}, R2 Score: {r2}")
+    # Log the trained model to MLflow
+    mlflow.keras.log_model(model, "traffic_prediction_model")
+
+    # Upload the train.log file as an artifact
+    mlflow.log_artifact("train.log")
+
+    logging.info(f"{model_type} Model - MAE: {mae}, MSE: {mse}, R2 Score: {r2}")
 
 
 if __name__ == "__main__":

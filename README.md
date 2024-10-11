@@ -37,3 +37,6 @@ This project involves developing, deploying, and monitoring a traffic prediction
 
 ## How to Submit
 - Upload your code, documentation, and deliverables to a GitHub repository.
+
+
+mlflow ui -- 8080
