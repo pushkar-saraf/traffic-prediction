@@ -24,12 +24,11 @@ def create_sequences(data, time_steps=10):
     return np.array(X), np.array(y)
 
 
-# Step 1: Generate Dummy Data
+# Step 1: Get reference and current data
 
 # Generate dummy reference data (simulating the training data)
 # Using numpy's random functions to generate normal distributions for two features.
 np.random.seed(0)  # Set seed for reproducibility of random data
-# TODO: change reference data to training data
 reference_data = pd.DataFrame()
 for feature_num in range(207):
     reference_data[f'{feature_num}'] = pd.Series(np.random.normal(0, 1, 1000))
@@ -96,8 +95,8 @@ def show_dashboard():
 # Function to send an email alert when data drift is detected.
 # This function sends an alert email with the drift score if drift exceeds a defined threshold.
 def send_email_alert(drift_score):
-    sender = 'alert@yourdomain.com'  # Sender's email address
-    receivers = ['team@yourdomain.com']  # List of recipients
+    sender = 'shreya@gmail.com'  # Sender's email address
+    receivers = ['shreya@gmail.com']  # List of recipients
     message = f"""Subject: Data Drift Alert
 
     Data drift detected! The drift score is {drift_score}.

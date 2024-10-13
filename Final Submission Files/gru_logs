@@ -1,0 +1,45 @@
+/home/owl/PycharmProjects/traffic-prediction/.venv/bin/python /home/owl/PycharmProjects/traffic-prediction/starter_notebook_phase_1.py
+2024-10-02 00:34:39.148868: I external/local_xla/xla/tsl/cuda/cudart_stub.cc:32] Could not find cuda drivers on your machine, GPU will not be used.
+2024-10-02 00:34:39.152911: I external/local_xla/xla/tsl/cuda/cudart_stub.cc:32] Could not find cuda drivers on your machine, GPU will not be used.
+2024-10-02 00:34:39.164753: E external/local_xla/xla/stream_executor/cuda/cuda_fft.cc:485] Unable to register cuFFT factory: Attempting to register factory for plugin cuFFT when one has already been registered
+2024-10-02 00:34:39.183575: E external/local_xla/xla/stream_executor/cuda/cuda_dnn.cc:8454] Unable to register cuDNN factory: Attempting to register factory for plugin cuDNN when one has already been registered
+2024-10-02 00:34:39.188915: E external/local_xla/xla/stream_executor/cuda/cuda_blas.cc:1452] Unable to register cuBLAS factory: Attempting to register factory for plugin cuBLAS when one has already been registered
+2024-10-02 00:34:39.203323: I tensorflow/core/platform/cpu_feature_guard.cc:210] This TensorFlow binary is optimized to use available CPU instructions in performance-critical operations.
+To enable the following instructions: AVX2 FMA, in other operations, rebuild TensorFlow with the appropriate compiler flags.
+2024-10-02 00:34:40.144077: W tensorflow/compiler/tf2tensorrt/utils/py_utils.cc:38] TF-TRT Warning: Could not find TensorRT
+/home/owl/PycharmProjects/traffic-prediction/.venv/lib/python3.12/site-packages/kfp/dsl/component_decorator.py:121: FutureWarning: The default base_image used by the @dsl.component decorator will switch from 'python:3.8' to 'python:3.9' on Oct 1, 2024. To ensure your existing components work with versions of the KFP SDK released after that date, you should provide an explicit base_image argument and ensure your component works as intended on Python 3.9.
+  return component_factory.create_component_from_func(
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1727843681.548964 3111061 cuda_executor.cc:1015] successful NUMA node read from SysFS had negative value (-1), but there must be at least one NUMA node, so returning NUMA node zero. See more at https://github.com/torvalds/linux/blob/v6.0/Documentation/ABI/testing/sysfs-bus-pci#L344-L355
+2024-10-02 00:34:41.549520: W tensorflow/core/common_runtime/gpu/gpu_device.cc:2343] Cannot dlopen some GPU libraries. Please make sure the missing libraries mentioned above are installed properly if you would like to use GPU. Follow the guide at https://www.tensorflow.org/install/gpu for how to download and setup the required libraries for your platform.
+Skipping registering GPU devices...
+/home/owl/PycharmProjects/traffic-prediction/.venv/lib/python3.12/site-packages/keras/src/layers/rnn/rnn.py:204: UserWarning: Do not pass an `input_shape`/`input_dim` argument to a layer. When using Sequential models, prefer using an `Input(shape)` object as the first layer in the model instead.
+  super().__init__(**kwargs)
+2024-10-02 00:34:42.115108: W external/local_tsl/tsl/framework/cpu_allocator_impl.cc:83] Allocation of 198579240 exceeds 10% of free system memory.
+750/750 ━━━━━━━━━━━━━━━━━━━━ 7s 6ms/step - loss: 0.0990 - mae: 0.1883
+2024-10-02 00:34:49.763580: W external/local_tsl/tsl/framework/cpu_allocator_impl.cc:83] Allocation of 198579240 exceeds 10% of free system memory.
+750/750 ━━━━━━━━━━━━━━━━━━━━ 2s 3ms/step
+322/322 ━━━━━━━━━━━━━━━━━━━━ 1s 3ms/step
+Train Score: 0.16 RMSE
+Test Score: 0.17 RMSE
+[<KerasVariable shape=(207, 192), dtype=float32, path=sequential/gru/gru_cell/kernel>, <KerasVariable shape=(64, 192), dtype=float32, path=sequential/gru/gru_cell/recurrent_kernel>, <KerasVariable shape=(2, 192), dtype=float32, path=sequential/gru/gru_cell/bias>, <KerasVariable shape=(64, 96), dtype=float32, path=sequential/gru_1/gru_cell/kernel>, <KerasVariable shape=(32, 96), dtype=float32, path=sequential/gru_1/gru_cell/recurrent_kernel>, <KerasVariable shape=(2, 96), dtype=float32, path=sequential/gru_1/gru_cell/bias>, <KerasVariable shape=(32, 207), dtype=float32, path=sequential/dense/kernel>, <KerasVariable shape=(207,), dtype=float32, path=sequential/dense/bias>]
+Model: "sequential"
+┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━┓
+┃ Layer (type)                    ┃ Output Shape           ┃       Param # ┃
+┡━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━┩
+│ gru (GRU)                       │ (None, 10, 64)         │        52,416 │
+├─────────────────────────────────┼────────────────────────┼───────────────┤
+│ gru_1 (GRU)                     │ (None, 32)             │         9,408 │
+├─────────────────────────────────┼────────────────────────┼───────────────┤
+│ dense (Dense)                   │ (None, 207)            │         6,831 │
+└─────────────────────────────────┴────────────────────────┴───────────────┘
+ Total params: 205,967 (804.56 KB)
+ Trainable params: 68,655 (268.18 KB)
+ Non-trainable params: 0 (0.00 B)
+ Optimizer params: 137,312 (536.38 KB)
+/home/owl/PycharmProjects/traffic-prediction/.venv/lib/python3.12/site-packages/kfp/client/client.py:159: FutureWarning: This client only works with Kubeflow Pipeline v2.0.0-beta.2 and later versions.
+  warnings.warn(
+Experiment details: http://localhost:8080/pipeline/#/experiments/details/df519b2e-b88a-4d20-9c00-3713c5a7e669
+Run details: http://localhost:8080/pipeline/#/runs/details/0321397b-2ffa-4c03-86bd-81a8d754c07f
+
+Process finished with exit code 0

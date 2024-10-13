@@ -46,8 +46,8 @@ def create_sequences(data, time_steps=10):
 # Step 4: Define the LSTM and GRU models
 def build_lstm_model(input_shape):
     model = Sequential()
-    model.add(LSTM(64, input_shape=input_shape, return_sequences=True))
-    model.add(LSTM(32))
+    model.add(LSTM(640, input_shape=input_shape, return_sequences=True))
+    model.add(LSTM(320))
     model.add(Dense(207))
     model.compile(optimizer='adam', loss='mse', metrics=['mae'])
     return model
@@ -72,10 +72,7 @@ def train_and_evaluate(model_type="LSTM"):
     time_steps = 10
     X, y = create_sequences(data_scaled, time_steps)
 
-    # # Reshape the data to (samples, time_steps, features)
-    # X = X.reshape((X.shape[0], X.shape[1], 1))  # One feature (traffic_speed)
-    #
-    input_shape = (2070, 0)
+    input_shape = (207, 10)
 
     # Start an MLflow run
     with mlflow.start_run():
@@ -90,21 +87,12 @@ def train_and_evaluate(model_type="LSTM"):
         # Log the model type as a parameter
         mlflow.log_param("model_type", model_type)
         logging.info(f"Starting training for {model_type} model...")
-
-        # Train the model
-        shape_X = shape(X)
-        # print(shape_X)
-        mse = {}
-        x_flat = [None] * shape_X[0]
-        for k in range(shape_X[0]):
-            x_flat[k] = X[k].reshape(-1)
-        print(shape(x_flat))
-        evaluate(model, x_flat, y, model_type)
+        evaluate(model, X, y, model_type)
 
 
 def evaluate(model, X, y, model_type):
     # history = model.fit(X, y, epochs=5, batch_size=32, validation_split=0.2)
-    history = model.fit(np.array(X), np.array(y))
+    history = model.fit(X, np.array(y))
 
     # Make predictions and calculate metrics
     y_pred = model.predict(X)
